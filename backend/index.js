@@ -25,9 +25,11 @@ app.use(
 );
 
 app.use("/Categoryimg", express.static("Categoryimg"));
+app.use("/itemimg", express.static("itemimg"));
 //!============ Routes ==========
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/item", itemsRouter);
+app.use("/api/v1/categoryitem", itemsRouter);
+app.use("/api/v1/items", itemsRouter);
 
 //!============== Start server port no ==========
 app.listen(PORT, () => {

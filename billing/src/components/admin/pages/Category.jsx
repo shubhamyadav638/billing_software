@@ -60,7 +60,7 @@ function Category() {
   const fileInputRef = useRef(null);
 
   const { loading, error, success, categories } = useSelector(
-    (state) => state.item
+    (state) => state.category
   );
 
   const [formData, setFormData] = useState({

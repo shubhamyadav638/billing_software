@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -7,6 +8,7 @@ function Dashboard() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("token");
     if (!isLoggedIn) {
+      toast.error("First login then access dashboard...!");
       navigate("/");
     }
   }, [navigate]);

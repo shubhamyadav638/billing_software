@@ -1,9 +1,56 @@
 import axios from "axios";
 const userLogin = "http://localhost:8000/api/v1/user/login";
-const addcategory = "http://localhost:8000/api/v1/item/addcategory";
-const getcategory = "http://localhost:8000/api/v1/item/getcategories";
-const deleteCategory = "http://localhost:8000/api/v1/item/category";
-const editCategory = "http://localhost:8000/api/v1/item/category";
+const addcategory = "http://localhost:8000/api/v1/categoryitem/addcategory";
+const getcategory = "http://localhost:8000/api/v1/categoryitem/getcategories";
+const deleteCategory = "http://localhost:8000/api/v1/categoryitem/category";
+const editCategory = "http://localhost:8000/api/v1/categoryitem/category";
+const additem = "http://localhost:8000/api/v1/items/additem";
+const getitem = "http://localhost:8000/api/v1/items/allitem";
+const deleteitem = "http://localhost:8000/api/v1/items/deleteitem";
+const edititem = "http://localhost:8000/api/v1/items/editItem";
+
+//!------------- add item api --------
+export const addItemAPI = async (itemData, file) => {
+  const formData = new FormData();
+  formData.append("itemName", itemData.itemName);
+  formData.append("price", itemData.price);
+  formData.append("unit", itemData.unit);
+  formData.append("category", itemData.category);
+  formData.append("img", file);
+
+  return axios.post(`${additem}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+//!------------- edit item api --------
+export const editItemAPI = async (id, itemData, file) => {
+  const formData = new FormData();
+  formData.append("itemName", itemData.itemName);
+  formData.append("price", itemData.price);
+  formData.append("unit", itemData.unit);
+  formData.append("category", itemData.category);
+  if (file) {
+    formData.append("img", file);
+  }
+
+  return axios.put(`${edititem}/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+//!------------- get item api --------
+export const getAllItemsAPI = async () => {
+  return axios.get(`${getitem}`);
+};
+
+//!------------- delete item api --------
+export const deleteItemAPI = async (id) => {
+  return axios.delete(`${deleteitem}/${id}`);
+};
 
 //!------------- add category api --------
 
