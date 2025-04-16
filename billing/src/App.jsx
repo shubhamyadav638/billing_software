@@ -11,6 +11,7 @@ import Category from "./components/admin/pages/Category";
 import AllItem from "./components/admin/pages/AllItem";
 import AddBills from "./components/admin/pages/Addbills";
 import AllBills from "./components/admin/pages/AllBills";
+import PrivateRoute from "./components/common/PrivateRoute";
 
 function Layout({ children, menuToggle, setMenuToggle }) {
   const location = useLocation();
@@ -18,14 +19,16 @@ function Layout({ children, menuToggle, setMenuToggle }) {
 
   return (
     <div className={menuToggle ? "toggle-sidebar" : ""}>
-      {!hideLayout && (
-        <>
+      {!hideLayout ? (
+        <PrivateRoute>
           <Header setMenuToggle={setMenuToggle} menuToggle={menuToggle} />
           <Sidebar />
-        </>
+          {children}
+          <Footer />
+        </PrivateRoute>
+      ) : (
+        children
       )}
-      {children}
-      {!hideLayout && <Footer />}
     </div>
   );
 }

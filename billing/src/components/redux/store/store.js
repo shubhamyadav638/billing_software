@@ -6,8 +6,8 @@ import additemSlice from "../slice/additem.slice.js";
 const store = configureStore({
   reducer: {
     user: userSlice,
-    category: itemSlice,
-    item: additemSlice,
+    categories: itemSlice,
+    items: additemSlice,
   },
 });
 

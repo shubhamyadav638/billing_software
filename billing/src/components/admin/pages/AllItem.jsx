@@ -76,8 +76,8 @@ const columnsConfig = (handleEdit, handleDelete) => [
 
 function AllItem() {
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.category);
-  const { items, loading } = useSelector((state) => state.item);
+  const { categories } = useSelector((state) => state.categories);
+  const { items, loading } = useSelector((state) => state.items);
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("");

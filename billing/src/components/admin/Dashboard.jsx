@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
+// import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+// import { toast } from "react-hot-toast";
 
 function Dashboard() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("token");
-    if (!isLoggedIn) {
-      toast.error("First login then access dashboard...!");
-      navigate("/");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const isLoggedIn = localStorage.getItem("token");
+  //   if (!isLoggedIn) {
+  //     toast.error("First login then access dashboard...!");
+  //     navigate("/");
+  //   }
+  // }, [navigate]);
   return (
     <main id="main" className="main">
       <div className="pagetitle">

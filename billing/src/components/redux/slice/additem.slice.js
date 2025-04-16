@@ -54,9 +54,39 @@ const additemSlice = createSlice({
   initialState: {
     items: [],
     loading: false,
+    cart: [],
+    // carts: savedCart,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    addToCart: (state, action) => {
+      const item = action.payload;
+      const oldItem = state.cart.find((i) => i._id === item._id);
+      if (oldItem) {
+        oldItem.quantity += 1;
+      } else {
+        state.cart.push({ ...item, quantity: 1 });
+      }
+    },
+    removeCart: (state, action) => {
+      const itemId = action.payload;
+      state.cart = state.cart.filter((i) => i._id !== itemId);
+    },
+    incrementQuantity: (state, action) => {
+      const itemId = action.payload;
+      const item = state.cart.find((i) => i._id === itemId);
+      if (item) item.quantity += 1;
+    },
+    decrementQuantity: (state, action) => {
+      const itemId = action.payload;
+      const item = state.cart.find((i) => i._id === itemId);
+      if (item && item.quantity > 1) {
+        item.quantity -= 1;
+      } else {
+        state.cart = state.cart.filter((i) => i._id !== itemId);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       //! ================= For Add Item =============
@@ -121,5 +151,6 @@ const additemSlice = createSlice({
       });
   },
 });
-
+export const { addToCart, removeCart, incrementQuantity, decrementQuantity } =
+  additemSlice.actions;
 export default additemSlice.reducer;

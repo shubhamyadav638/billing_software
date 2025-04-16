@@ -30,24 +30,6 @@ function Header({ menuToggle, setMenuToggle }) {
         />
       </div>
 
-      <div className="search-bar">
-        <form
-          className="search-form d-flex align-items-center"
-          method="POST"
-          action="#"
-        >
-          <input
-            type="text"
-            name="query"
-            placeholder="Search"
-            title="Enter search keyword"
-          />
-          <button type="submit" title="Search">
-            <i className="bi bi-search" />
-          </button>
-        </form>
-      </div>
-
       <nav className="header-nav ms-auto">
         <ul className="d-flex align-items-center">
           <li className="nav-item d-block d-lg-none">
