@@ -36,7 +36,6 @@ const columnsConfig = (handleEdit, handleDelete) => [
     selector: (row) => row.itemName,
     sortable: true,
   },
-
   {
     name: "Price",
     selector: (row) =>
@@ -45,7 +44,6 @@ const columnsConfig = (handleEdit, handleDelete) => [
         : row.price,
     sortable: true,
   },
-
   {
     name: "Unit",
     selector: (row) => row.unit,
@@ -83,10 +81,8 @@ function AllItem() {
   const [unit, setUnit] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
-
   const [formError, setFormError] = useState({});
   const [submitError, setSubmitError] = useState("");
-
   const [isEditMode, setIsEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
 
@@ -154,7 +150,11 @@ function AllItem() {
 
   const handleEdit = (item) => {
     setItemName(item.itemName);
-    setPrice(item.price.toString());
+    setPrice(
+      typeof item.price === "object" && item.price.$numberDecimal
+        ? item.price.$numberDecimal
+        : item.price.toString()
+    );
     setUnit(item.unit);
     setCategory(item.category);
     setImage(null);
@@ -323,7 +323,6 @@ function AllItem() {
                       </option>
                     ))}
                   </select>
-
                   {formError.category && (
                     <small className="text-danger">{formError.category}</small>
                   )}
