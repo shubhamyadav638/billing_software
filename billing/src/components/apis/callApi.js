@@ -8,6 +8,13 @@ const additem = "http://localhost:8000/api/v1/items/additem";
 const getitem = "http://localhost:8000/api/v1/items/allitem";
 const deleteitem = "http://localhost:8000/api/v1/items/deleteitem";
 const edititem = "http://localhost:8000/api/v1/items/editItem";
+const addBill = "http://localhost:8000/api/v1/bill/addbills";
+
+//! ==========  Add bill api ========
+export const addBillAPI = async (billData) => {
+  const response = await axios.post(addBill, billData);
+  return response.data;
+};
 
 //!------------- add item api --------
 export const addItemAPI = async (itemData, file) => {

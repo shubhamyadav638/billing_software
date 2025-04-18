@@ -8,7 +8,7 @@ import {
 
 const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-//!------------- addItem -------------
+//!------------- addItem Thunk -------------
 export const addItem = createAsyncThunk(
   "addItem",
   async ({ itemData, file }) => {
@@ -21,7 +21,7 @@ export const addItem = createAsyncThunk(
   }
 );
 
-//!------------- editItem -------------
+//!------------- editItem Thunk -------------
 export const editItem = createAsyncThunk(
   "editItem",
   async ({ id, itemData, file }) => {
@@ -34,7 +34,7 @@ export const editItem = createAsyncThunk(
   }
 );
 
-//!------------- getAllItems -------------
+//!------------- getAllItems Thunk -------------
 export const getAllItems = createAsyncThunk("getAllItems", async () => {
   try {
     const response = await getAllItemsAPI();
@@ -44,7 +44,7 @@ export const getAllItems = createAsyncThunk("getAllItems", async () => {
   }
 });
 
-//!------------- deleteItem -------------
+//!------------- deleteItem Thunk -------------
 export const deleteItem = createAsyncThunk("deleteItem", async (id) => {
   try {
     await deleteItemAPI(id);
@@ -63,7 +63,7 @@ const additemSlice = createSlice({
     error: null,
   },
   reducers: {
-    //!------------- Add Item-------------
+    //!------------- Add Item -------------
     addToCart: (state, action) => {
       const item = action.payload;
       const oldItem = state.cart.find((i) => i._id === item._id);
@@ -75,14 +75,14 @@ const additemSlice = createSlice({
       localStorage.setItem("cart", JSON.stringify(state.cart));
     },
 
-    //!------------- Remove Item-------------
+    //!------------- Remove Item -------------
     removeCart: (state, action) => {
       const itemId = action.payload;
       state.cart = state.cart.filter((i) => i._id !== itemId);
       localStorage.setItem("cart", JSON.stringify(state.cart));
     },
 
-    //!------------- Increment Quantity Item-------------
+    //!------------- Increment Quantity Item -------------
     incrementQuantity: (state, action) => {
       const itemId = action.payload;
       const item = state.cart.find((i) => i._id === itemId);
@@ -90,7 +90,7 @@ const additemSlice = createSlice({
       localStorage.setItem("cart", JSON.stringify(state.cart));
     },
 
-    //!------------- decrement Quantity Item-------------
+    //!------------- decrement Quantity Item -------------
     decrementQuantity: (state, action) => {
       const itemId = action.payload;
       const item = state.cart.find((i) => i._id === itemId);
@@ -102,7 +102,7 @@ const additemSlice = createSlice({
       localStorage.setItem("cart", JSON.stringify(state.cart));
     },
 
-    //!------------- Clear cart-------------
+    //!------------- Clear cart -------------
     clearCart: (state) => {
       state.cart = [];
       localStorage.setItem("cart", JSON.stringify([]));

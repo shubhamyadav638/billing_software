@@ -8,6 +8,7 @@ import {
   decrementQuantity,
 } from "../../redux/slice/additem.slice";
 import { getCategories } from "../../redux/slice/item.slice";
+import { submitBill } from "../../redux/slice/addBill.slice";
 
 function AddBills() {
   const dispatch = useDispatch();
@@ -16,6 +17,18 @@ function AddBills() {
 
   const [finalItems, setFinalItems] = useState([]);
   const [disCount, setDiscount] = useState(0);
+
+  const handleSubmitBill = () => {
+    const addBillData = {
+      items: cart,
+      subTotal: subTotalPrice.toFixed(2),
+      discount: disCount.toFixed(2),
+      grandTotal: grandTotal.toFixed(2),
+      createdAt: new Date(),
+    };
+    dispatch(submitBill(addBillData));
+    // console.log(addBillData);
+  };
 
   useEffect(() => {
     dispatch(getAllItems());
@@ -261,7 +274,11 @@ function AddBills() {
                         </div>
                       </div>
                       <div className="modal-footer justify-content-center">
-                        <button className="btn btn-primary" type="button">
+                        <button
+                          className="btn btn-primary"
+                          type="button"
+                          onClick={handleSubmitBill}
+                        >
                           Proceed
                         </button>
                       </div>

@@ -156,10 +156,10 @@ export const userLogin = async (req, res) => {
       });
     }
 
-    console.log("Entered password:", password);
-    console.log("Stored hash:", user.password);
+    // console.log("Entered password:", password);
+    // console.log("Stored hash:", user.password);
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isPasswordValid);
+    // console.log("Password match:", isPasswordValid);
 
     if (!isPasswordValid) {
       return res.status(401).json({

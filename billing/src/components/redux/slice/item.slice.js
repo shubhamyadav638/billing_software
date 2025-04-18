@@ -6,7 +6,7 @@ import {
   editCategoryAPI,
 } from "../../apis/callApi";
 
-//!============ Add category  ==============
+//!============ Add category  Thunk ==============
 export const addCategory = createAsyncThunk(
   "addCategory",
   async (formData, { rejectWithValue }) => {
@@ -19,7 +19,7 @@ export const addCategory = createAsyncThunk(
   }
 );
 
-//!============ Get category  ==============
+//!============ Get category  Thunk ==============
 export const getCategories = createAsyncThunk(
   "getCategories",
   async (_, { rejectWithValue }) => {
@@ -33,7 +33,7 @@ export const getCategories = createAsyncThunk(
   }
 );
 
-//!============ Edit category  ==============
+//!============ Edit category Thunk  ==============
 export const editCategory = createAsyncThunk(
   "Edit",
   async ({ id, formData }, { rejectWithValue }) => {
@@ -45,7 +45,7 @@ export const editCategory = createAsyncThunk(
   }
 );
 
-//!============ Delete category ==============
+//!============ Delete category Thunk ==============
 export const deleteCategory = createAsyncThunk(
   "delete",
   async (id, { rejectWithValue }) => {

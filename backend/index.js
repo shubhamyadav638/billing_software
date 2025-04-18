@@ -4,6 +4,8 @@ import cors from "cors";
 import databaseconnection from "./config/db.js";
 import userRouter from "./routes/user.route.js";
 import itemsRouter from "./routes/items.route.js";
+import printerRouter from "./routes/printer.route.js";
+import billRouter from "./routes/bills.route.js";
 
 //! ========== Dot env =======
 dotenv.config();
@@ -30,6 +32,8 @@ app.use("/itemimg", express.static("itemimg"));
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/categoryitem", itemsRouter);
 app.use("/api/v1/items", itemsRouter);
+app.use("/api/v1/printer", printerRouter);
+app.use("/api/v1/bill", billRouter);
 
 //!============== Start server port no ==========
 app.listen(PORT, () => {
