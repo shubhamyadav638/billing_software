@@ -9,6 +9,17 @@ const getitem = "http://localhost:8000/api/v1/items/allitem";
 const deleteitem = "http://localhost:8000/api/v1/items/deleteitem";
 const edititem = "http://localhost:8000/api/v1/items/editItem";
 const addBill = "http://localhost:8000/api/v1/bill/addbills";
+const getBill = "http://localhost:8000/api/v1/bill/getbill";
+
+//! ==========  Get bill and Billitems api ========
+export const getBillsAPI = async () => {
+  try {
+    const response = await axios.get(getBill);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || "Failed to get bills");
+  }
+};
 
 //! ==========  Add bill api ========
 export const addBillAPI = async (billData) => {
@@ -23,6 +34,7 @@ export const addItemAPI = async (itemData, file) => {
   formData.append("price", itemData.price);
   formData.append("unit", itemData.unit);
   formData.append("category", itemData.category);
+  formData.append("gst", itemData.gst);
   formData.append("img", file);
 
   return axios.post(`${additem}`, formData, {
@@ -38,6 +50,7 @@ export const editItemAPI = async (id, itemData, file) => {
   formData.append("price", itemData.price);
   formData.append("unit", itemData.unit);
   formData.append("category", itemData.category);
+  formData.append("gst", itemData.gst);
   if (file) {
     formData.append("img", file);
   }

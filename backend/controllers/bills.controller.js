@@ -4,17 +4,28 @@ import { Bills } from "../models/bills.model.js";
 //! ==========  Add Bill Data =============
 export const addBill = async (req, res) => {
   try {
-    const { items, subTotal, discount, grandTotal, createdAt } = req.body;
+    const {
+      items,
+      subTotal,
+      discount,
+      grandTotal,
+      createdAt,
+      totalTax,
+      customerPhone,
+    } = req.body;
 
     const newBill = await Bills.create({
       subTotal,
       discount,
       grandTotal,
       createdAt,
+      totalTax,
+      customerPhone,
     });
 
-    console.log(items);
+    // console.log(items);
 
+    //! ============ Add Bill item ==========
     const loopItems = await Promise.all(
       items.map(async (item) => {
         return await BillItem.create({
@@ -43,5 +54,21 @@ export const addBill = async (req, res) => {
       error: "Failed to add bill",
       details: err.message,
     });
+  }
+};
+
+//! ============ Get Bill and billitem ==========
+export const getBills = async (req, res) => {
+  try {
+    const bills = await Bills.find().sort({ createdAt: -1 });
+    const billsWithItems = await Promise.all(
+      bills.map(async (bill) => {
+        const billItems = await BillItem.find({ billId: bill._id });
+        return { ...bill.toObject(), billItems };
+      })
+    );
+    res.json(billsWithItems);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

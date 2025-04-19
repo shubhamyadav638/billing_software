@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { addBillAPI } from "../../apis/callApi";
+import { addBillAPI, getBillsAPI } from "../../apis/callApi";
 
-//! ========== Add bill Thunk =========
+//! ========== Submit bill Thunk =========
 export const submitBill = createAsyncThunk(
   "submitBill",
   async (billData, { rejectWithValue }) => {
@@ -14,15 +14,33 @@ export const submitBill = createAsyncThunk(
   }
 );
 
+//! ========== Get bill and bill item Thunk =========
+
+// Async thunk
+export const getBills = createAsyncThunk(
+  "getBills",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await getBillsAPI();
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const billSlice = createSlice({
   name: "bills",
   initialState: {
+    bills: [],
     loading: false,
     success: false,
     error: null,
   },
   extraReducers: (builder) => {
     builder
+
+      //! ========== Submit bill =========
       .addCase(submitBill.pending, (state) => {
         state.loading = true;
         state.success = false;
@@ -35,6 +53,21 @@ const billSlice = createSlice({
       .addCase(submitBill.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      //! ========== get bill and billitem  =========
+
+      .addCase(getBills.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getBills.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bills = action.payload;
+      })
+      .addCase(getBills.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });

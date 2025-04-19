@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { IoMdAddCircle } from "react-icons/io";
 import DataTable from "react-data-table-component";
@@ -50,6 +50,11 @@ const columnsConfig = (handleEdit, handleDelete) => [
     sortable: true,
   },
   {
+    name: "Gst",
+    selector: (row) => row.gst + "%",
+    sortable: true,
+  },
+  {
     name: "Action",
     cell: (row) => (
       <>
@@ -74,12 +79,16 @@ const columnsConfig = (handleEdit, handleDelete) => [
 
 function AllItem() {
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
+
   const { categories } = useSelector((state) => state.categories);
   const { items, loading } = useSelector((state) => state.items);
+
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("");
   const [category, setCategory] = useState("");
+  const [gst, setGst] = useState("");
   const [image, setImage] = useState(null);
   const [formError, setFormError] = useState({});
   const [submitError, setSubmitError] = useState("");
@@ -98,6 +107,7 @@ function AllItem() {
     if (!unit) errors.unit = "Unit is required";
     if (!category || category === "Select...")
       errors.category = "Category is required";
+    if (!gst || gst === "Select...") errors.gst = "GST is required";
     if (!image && !isEditMode) errors.image = "Image is required";
     setFormError(errors);
     return Object.keys(errors).length === 0;
@@ -108,11 +118,13 @@ function AllItem() {
     setPrice("");
     setUnit("");
     setCategory("");
+    setGst("");
     setImage(null);
     setFormError({});
     setSubmitError("");
     setIsEditMode(false);
     setEditItemId(null);
+    if (fileInputRef.current) fileInputRef.current.value = null;
   };
 
   const handleSubmit = async () => {
@@ -124,6 +136,7 @@ function AllItem() {
       price,
       unit,
       category,
+      gst,
     };
 
     const toastId = toast.loading(
@@ -140,6 +153,7 @@ function AllItem() {
         await dispatch(addItem({ itemData: formData, file: image })).unwrap();
         toast.success("Item added successfully", { id: toastId });
       }
+      dispatch(getAllItems());
       resetForm();
       document.getElementById("closeModalBtn").click();
     } catch (err) {
@@ -157,6 +171,7 @@ function AllItem() {
     );
     setUnit(item.unit);
     setCategory(item.category);
+    setGst(item.gst?.toString() || "");
     setImage(null);
     setIsEditMode(true);
     setEditItemId(item._id);
@@ -172,6 +187,7 @@ function AllItem() {
     try {
       await dispatch(deleteItem(id)).unwrap();
       toast.success("Item deleted successfully", { id: toastId });
+      dispatch(getAllItems());
     } catch (err) {
       toast.error(err.message || "Failed to delete item", { id: toastId });
     }
@@ -203,8 +219,7 @@ function AllItem() {
           data-bs-target="#exampleModal"
           onClick={resetForm}
         >
-          <IoMdAddCircle size={20} />
-          Add items
+          <IoMdAddCircle size={20} /> Add items
         </button>
       </div>
 
@@ -214,17 +229,17 @@ function AllItem() {
         progressPending={loading}
       />
 
+      {/* Modal */}
       <div
         className="modal fade"
         id="exampleModal"
         tabIndex={-1}
-        aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">
+              <h1 className="modal-title fs-5">
                 {isEditMode ? "Edit Item" : "Add Item"}
               </h1>
               <button
@@ -251,10 +266,23 @@ function AllItem() {
                     className="form-control"
                     id="file"
                     accept="image/*"
+                    ref={fileInputRef}
                     onChange={(e) => setImage(e.target.files[0])}
                   />
                   {formError.image && (
                     <small className="text-danger">{formError.image}</small>
+                  )}
+                  {isEditMode && !image && (
+                    <img
+                      src={items.find((i) => i._id === editItemId)?.img}
+                      alt="Current"
+                      className="mt-2"
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "cover",
+                      }}
+                    />
                   )}
                 </div>
 
@@ -274,7 +302,7 @@ function AllItem() {
                   )}
                 </div>
 
-                <div className="col-4 mb-3">
+                <div className="col-6 mb-3">
                   <label htmlFor="price" className="form-label">
                     Price
                   </label>
@@ -290,7 +318,7 @@ function AllItem() {
                   )}
                 </div>
 
-                <div className="col-4 mb-3">
+                <div className="col-6 mb-3">
                   <label htmlFor="unit" className="form-label">
                     Unit
                   </label>
@@ -306,9 +334,9 @@ function AllItem() {
                   )}
                 </div>
 
-                <div className="col-4 mb-3">
+                <div className="col-6 mb-3">
                   <label htmlFor="category" className="form-label">
-                    Choose category
+                    Category
                   </label>
                   <select
                     id="category"
@@ -325,6 +353,28 @@ function AllItem() {
                   </select>
                   {formError.category && (
                     <small className="text-danger">{formError.category}</small>
+                  )}
+                </div>
+
+                <div className="col-6 mb-3">
+                  <label htmlFor="gst" className="form-label">
+                    GST (%)
+                  </label>
+                  <select
+                    id="gst"
+                    className="form-select"
+                    value={gst}
+                    onChange={(e) => setGst(e.target.value)}
+                  >
+                    <option value="">Select...</option>
+                    <option value="0">0%</option>
+                    <option value="5">5%</option>
+                    <option value="12">12%</option>
+                    <option value="18">18%</option>
+                    <option value="28">28%</option>
+                  </select>
+                  {formError.gst && (
+                    <small className="text-danger">{formError.gst}</small>
                   )}
                 </div>
               </div>

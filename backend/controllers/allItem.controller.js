@@ -10,10 +10,10 @@ const getUploadsPath = (filename) => {
 
 export const addItem = async (req, res) => {
   try {
-    const { itemName, price, unit, category } = req.body;
+    const { itemName, price, unit, category, gst } = req.body;
     const imgFile = req.file;
 
-    if (!itemName || !price || !unit || !category || !imgFile) {
+    if (!itemName || !price || !unit || !category || !gst || !imgFile) {
       if (imgFile) {
         const filePath = getUploadsPath(imgFile.filename);
         if (fs.existsSync(filePath)) {
@@ -29,6 +29,7 @@ export const addItem = async (req, res) => {
       unit,
       img: `${req.protocol}://${req.get("host")}/itemimg/${imgFile.filename}`,
       category,
+      gst,
     });
 
     await newItem.save();
@@ -46,7 +47,7 @@ export const addItem = async (req, res) => {
 
 export const editItem = async (req, res) => {
   try {
-    const { itemName, price, unit, category } = req.body || {};
+    const { itemName, price, unit, category, gst } = req.body || {};
     const imgFile = req.file;
     const itemId = req.params.id;
 
@@ -69,6 +70,7 @@ export const editItem = async (req, res) => {
         price: price ?? item.price,
         unit: unit ?? item.unit,
         category: category ?? item.category,
+        gst: gst ?? item.gst,
         img: imgFile
           ? `${req.protocol}://${req.get("host")}/itemimg/${imgFile.filename}`
           : item.img,

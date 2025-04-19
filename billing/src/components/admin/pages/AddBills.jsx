@@ -9,22 +9,35 @@ import {
 } from "../../redux/slice/additem.slice";
 import { getCategories } from "../../redux/slice/item.slice";
 import { submitBill } from "../../redux/slice/addBill.slice";
+import toast from "react-hot-toast";
 
 function AddBills() {
   const dispatch = useDispatch();
   const { items, cart } = useSelector((state) => state.items);
   const { categories } = useSelector((state) => state.categories);
 
+  // console.log(items);
+
   const [finalItems, setFinalItems] = useState([]);
   const [disCount, setDiscount] = useState(0);
+  const [customerPhone, setCustomerPhone] = useState("");
 
   const handleSubmitBill = () => {
+    const phoneRegex = /^[0-9]{10}$/;
+
+    if (!phoneRegex.test(customerPhone)) {
+      toast.error("Please enter a valid phone No.");
+      return;
+    }
+
     const addBillData = {
       items: cart,
       subTotal: subTotalPrice.toFixed(2),
       discount: disCount.toFixed(2),
       grandTotal: grandTotal.toFixed(2),
       createdAt: new Date(),
+      totalTax: totalTax.toFixed(2),
+      customerPhone: customerPhone,
     };
     dispatch(submitBill(addBillData));
     // console.log(addBillData);
@@ -57,7 +70,14 @@ function AddBills() {
     0
   );
 
-  const grandTotal = subTotalPrice - disCount;
+  const totalTax = cart.reduce(
+    (acc, item) =>
+      acc +
+      (parseFloat(item.price.$numberDecimal) * item.quantity * item.gst) / 100,
+    0
+  );
+
+  const grandTotal = subTotalPrice - disCount + totalTax;
 
   return (
     <main id="main" className="main">
@@ -139,6 +159,16 @@ function AddBills() {
               </div>
             </div>
 
+            <div className="p-2">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Customer Phone no"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+              />
+            </div>
+
             <div className="card-body overflow-auto">
               {cart.map((item) => (
                 <div className="row p-1 border rounded mb-2" key={item._id}>
@@ -199,6 +229,10 @@ function AddBills() {
                       onChange={handleDiscount}
                     />
                   </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-6">Total Tax</div>
+                  <div className="col-6 text-end">₹ {totalTax.toFixed(2)}</div>
                 </div>
                 <div className="row mb-3">
                   <div className="col-6">Grand Total</div>
@@ -266,6 +300,10 @@ function AddBills() {
                           <div className="col-6">Discount</div>
                           <div className="col-6 text-end">
                             ₹ {disCount.toFixed(2)}
+                          </div>
+                          <div className="col-6">Total Tax</div>
+                          <div className="col-6 text-end">
+                            ₹ {totalTax.toFixed(2)}
                           </div>
                           <div className="col-6 fw-bold">Grand Total</div>
                           <div className="col-6 text-end fw-bold">

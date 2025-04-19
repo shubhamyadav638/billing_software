@@ -22,6 +22,11 @@ const allItemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    gst: {
+      type: String,
+      required: true,
+      enum: ["0", "5", "12", "18", "28"],
+    },
   },
   { timestamps: true }
 );

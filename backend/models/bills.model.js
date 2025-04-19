@@ -30,6 +30,12 @@ const billSchema = new mongoose.Schema(
     createdAt: {
       type: String,
     },
+    totalTax: {
+      type: Number,
+    },
+    customerPhone: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

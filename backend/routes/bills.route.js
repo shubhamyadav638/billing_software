@@ -1,14 +1,9 @@
 import express from "express";
-import {
-  addBillItem,
-  getAllBillItems,
-} from "../controllers/billItem.controller.js";
-import { addBill } from "../controllers/bills.controller.js";
+import { addBill, getBills } from "../controllers/bills.controller.js";
 
 const router = express.Router();
 
-router.post("/addbillitem", addBillItem);
-router.get("/getbill", getAllBillItems);
+router.get("/getbill", getBills);
 router.post("/addbills", addBill);
 
 export default router;
