@@ -2,15 +2,22 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearToken } from "../redux/slice/user.slice";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 function Header({ menuToggle, setMenuToggle }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const userData = JSON.parse(localStorage.getItem("user"));
+
   const handleLogout = () => {
     dispatch(clearToken());
-    toast.success("Logged out successfully!");
+    Swal.fire({
+      icon: "success",
+      title: "Logged out successfully!",
+      showConfirmButton: false,
+      timer: 1500,
+    });
     navigate("/");
   };
 
@@ -200,25 +207,22 @@ function Header({ menuToggle, setMenuToggle }) {
                 className="rounded-circle"
               />
               <span className="d-none d-md-block dropdown-toggle ps-2">
-                K. Anderson
+                {userData.fullName}
               </span>
             </a>
             <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
               <li className="dropdown-header">
-                <h6>Kevin Anderson</h6>
-                <span>Web Designer</span>
+                <h6>{userData.fullName}</h6>
+                <span>{userData.mobileNo}</span>
               </li>
               <li>
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a
-                  className="dropdown-item d-flex align-items-center"
-                  href="users-profile.html"
-                >
+                <p className="dropdown-item d-flex align-items-center">
                   <i className="bi bi-person" />
-                  <span>My Profile</span>
-                </a>
+                  <Link to="/profile">My Profile</Link>
+                </p>
               </li>
               <li>
                 <hr className="dropdown-divider" />

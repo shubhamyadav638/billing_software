@@ -12,6 +12,7 @@ import AllItem from "./components/admin/pages/AllItem";
 import AddBills from "./components/admin/pages/Addbills";
 import AllBills from "./components/admin/pages/AllBills";
 import PrivateRoute from "./components/common/PrivateRoute";
+import Profile from "./components/admin/pages/Profile";
 
 function Layout({ children, menuToggle, setMenuToggle }) {
   const location = useLocation();
@@ -46,6 +47,7 @@ function App() {
           <Route path="/category" element={<Category />} />
           <Route path="/all-bills" element={<AllBills />} />
           <Route path="/add-bills" element={<AddBills />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Layout>
     </BrowserRouter>

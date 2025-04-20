@@ -12,6 +12,7 @@ export const addBill = async (req, res) => {
       createdAt,
       totalTax,
       customerPhone,
+      paymentMethod,
     } = req.body;
 
     const newBill = await Bills.create({
@@ -21,6 +22,7 @@ export const addBill = async (req, res) => {
       createdAt,
       totalTax,
       customerPhone,
+      paymentMethod,
     });
 
     // console.log(items);
@@ -54,6 +56,26 @@ export const addBill = async (req, res) => {
       error: "Failed to add bill",
       details: err.message,
     });
+  }
+};
+
+//! ========== Cancel Bill =============
+export const cancelBill = async (req, res) => {
+  try {
+    const { billId } = req.params;
+    const updatedBill = await Bills.findByIdAndUpdate(
+      billId,
+      { billStatus: "Cancelled" },
+      { new: true }
+    );
+
+    if (!updatedBill) {
+      return res.status(404).json({ error: "Bill not found" });
+    }
+
+    res.status(200).json(updatedBill);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

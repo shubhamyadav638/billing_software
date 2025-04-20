@@ -1,5 +1,6 @@
 import axios from "axios";
 const userLogin = "http://localhost:8000/api/v1/user/login";
+const userUpdate = "http://localhost:8000/api/v1/user/update";
 const addcategory = "http://localhost:8000/api/v1/categoryitem/addcategory";
 const getcategory = "http://localhost:8000/api/v1/categoryitem/getcategories";
 const deleteCategory = "http://localhost:8000/api/v1/categoryitem/category";
@@ -10,6 +11,7 @@ const deleteitem = "http://localhost:8000/api/v1/items/deleteitem";
 const edititem = "http://localhost:8000/api/v1/items/editItem";
 const addBill = "http://localhost:8000/api/v1/bill/addbills";
 const getBill = "http://localhost:8000/api/v1/bill/getbill";
+const cancleBill = "http://localhost:8000/api/v1/bill/cancel";
 
 //! ==========  Get bill and Billitems api ========
 export const getBillsAPI = async () => {
@@ -110,5 +112,20 @@ export const login = async (credentials) => {
     return response.data;
   } catch (error) {
     throw error.response?.data;
+  }
+};
+//!------------- user  update profile ----------
+export const updateUserProfileAPI = async (id, profileData) => {
+  const response = await axios.put(`${userUpdate}/${id}`, profileData);
+  return response.data;
+};
+
+//!-------------   CancelBill  ----------
+export const cancelBillAPI = async (id) => {
+  try {
+    const response = await axios.put(`${cancleBill}/${id}`);
+    return response.data;
+  } catch (e) {
+    throw new Error("Error canceling the bill");
   }
 };

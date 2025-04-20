@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { clearToken } from "../redux/slice/user.slice";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 function Sidebar() {
   const dispatch = useDispatch();
@@ -10,7 +10,12 @@ function Sidebar() {
 
   const handleLogout = () => {
     dispatch(clearToken());
-    toast.success("Logged out successfully!");
+    Swal.fire({
+      icon: "success",
+      title: "Logged out successfully!",
+      showConfirmButton: false,
+      timer: 1500,
+    });
     navigate("/");
   };
   return (
@@ -83,6 +88,13 @@ function Sidebar() {
               </Link>
             </li>
           </ul>
+        </li>
+
+        <li className="nav-item">
+          <a className="nav-link collapsed text-decoration-none">
+            <i className="bi bi-gear" />
+            <span>Account Settings</span>
+          </a>
         </li>
 
         <li className="nav-item">

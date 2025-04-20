@@ -1,7 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { login, } from "../../apis/callApi";
-
-
+import { login, updateUserProfileAPI } from "../../apis/callApi";
 
 //!------------- user login thunk ---------------
 
@@ -16,6 +14,18 @@ export const userLogin = createAsyncThunk(
   }
 );
 
+//!------------- update User Profile  thunk ---------------
+
+export const updateProfile = createAsyncThunk(
+  "user/updateProfile",
+  async ({ id, profileData }, { rejectWithValue }) => {
+    try {
+      return await updateUserProfileAPI(id, profileData);
+    } catch (error) {
+      return rejectWithValue(error.message || "Profile update failed");
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -30,13 +40,14 @@ const userSlice = createSlice({
       state.token = null;
       state.user = [];
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
     },
   },
 
   extraReducers: (builder) => {
     builder
-     
-    //!------------- user login ----------------
+
+      //!------------- user login ----------------
       .addCase(userLogin.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -45,11 +56,28 @@ const userSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         const token = action.payload?.token;
+        const userData = action.payload?.user;
         if (token) {
           localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(userData));
         }
       })
       .addCase(userLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //!------------- user update profile ----------------
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

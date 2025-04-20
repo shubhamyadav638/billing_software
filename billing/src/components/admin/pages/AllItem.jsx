@@ -9,8 +9,8 @@ import {
   deleteItem,
   getAllItems,
 } from "../../redux/slice/additem.slice";
-import toast from "react-hot-toast";
 import { getCategories } from "../../redux/slice/item.slice";
+import Swal from "sweetalert2";
 
 const columnsConfig = (handleEdit, handleDelete) => [
   {
@@ -139,25 +139,29 @@ function AllItem() {
       gst,
     };
 
-    const toastId = toast.loading(
-      isEditMode ? "Updating item..." : "Adding item..."
-    );
+    Swal.fire({
+      title: isEditMode ? "Updating item..." : "Adding item...",
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      allowOutsideClick: false,
+    });
 
     try {
       if (isEditMode) {
         await dispatch(
           editItem({ id: editItemId, itemData: formData, file: image })
         ).unwrap();
-        toast.success("Item updated successfully", { id: toastId });
+        Swal.fire("Success", "Item updated successfully", "success");
       } else {
         await dispatch(addItem({ itemData: formData, file: image })).unwrap();
-        toast.success("Item added successfully", { id: toastId });
+        Swal.fire("Success", "Item added successfully", "success");
       }
       dispatch(getAllItems());
       resetForm();
       document.getElementById("closeModalBtn").click();
     } catch (err) {
-      toast.error(err.message || "Failed to submit", { id: toastId });
+      Swal.fire("Error", err.message || "Failed to submit", "error");
       setSubmitError(err.message || "Failed to submit");
     }
   };
@@ -178,18 +182,32 @@ function AllItem() {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
-    if (!confirmed) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won’t be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
 
-    const toastId = toast.loading("Deleting item...");
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: "Deleting item...",
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      allowOutsideClick: false,
+    });
+
     try {
       await dispatch(deleteItem(id)).unwrap();
-      toast.success("Item deleted successfully", { id: toastId });
+      Swal.fire("Deleted!", "Item deleted successfully.", "success");
       dispatch(getAllItems());
     } catch (err) {
-      toast.error(err.message || "Failed to delete item", { id: toastId });
+      Swal.fire("Error", err.message || "Failed to delete item", "error");
     }
   };
 

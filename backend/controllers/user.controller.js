@@ -207,3 +207,93 @@ export const userLogin = async (req, res) => {
     });
   }
 };
+
+//!================ Edit user profile ===========
+export const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { fullName, mobileNo, address, email } = req.body;
+
+    const updatedData = {};
+
+    if (fullName) updatedData.fullName = fullName;
+    if (address) updatedData.address = address;
+
+    if (mobileNo) {
+      const contactRegex = /^[0-9]{10}$/;
+      if (!contactRegex.test(mobileNo)) {
+        return res.status(400).json({
+          success: false,
+          message: "Mobile number must be exactly 10 digits",
+        });
+      }
+      updatedData.mobileNo = mobileNo;
+    }
+
+    if (email) {
+      const emailRegex = /^\S+@\S+\.\S+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== userId) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already in use by another account",
+        });
+      }
+
+      updatedData.email = email;
+
+      // updatedData.isEmailVerify = false;
+      // updatedData.isActive = 0;
+
+      /*
+      const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      const verifyUrl = `http://localhost:3000/api/v1/user/verify-email/${token}`;
+      await transporter.sendMail({
+        to: email,
+        subject: "Verify Your New Email",
+        html: `<p>Please verify your new email by clicking <a href="${verifyUrl}">here</a>.</p>`,
+      });
+      */
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updatedData },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user: {
+        id: updatedUser._id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        mobileNo: updatedUser.mobileNo,
+        address: updatedUser.address,
+        isEmailVerify: updatedUser.isEmailVerify,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};

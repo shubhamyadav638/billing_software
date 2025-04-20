@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllItems,
@@ -9,7 +9,7 @@ import {
 } from "../../redux/slice/additem.slice";
 import { getCategories } from "../../redux/slice/item.slice";
 import { submitBill } from "../../redux/slice/addBill.slice";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 function AddBills() {
   const dispatch = useDispatch();
@@ -21,12 +21,25 @@ function AddBills() {
   const [finalItems, setFinalItems] = useState([]);
   const [disCount, setDiscount] = useState(0);
   const [customerPhone, setCustomerPhone] = useState("");
+  const closeModal = useRef();
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
 
-  const handleSubmitBill = () => {
-    const phoneRegex = /^[0-9]{10}$/;
+  const handleSubmitBill = async () => {
+    if (cart.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Cart is empty. Please add items.",
+      });
+      return;
+    }
 
-    if (!phoneRegex.test(customerPhone)) {
-      toast.error("Please enter a valid phone No.");
+    if (customerPhone && !/^\d{10}$/.test(customerPhone)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Phone Number",
+        text: "Please enter a valid 10-digit number.",
+      });
       return;
     }
 
@@ -38,11 +51,31 @@ function AddBills() {
       createdAt: new Date(),
       totalTax: totalTax.toFixed(2),
       customerPhone: customerPhone,
+      billStatus: "Active",
+      paymentMethod: paymentMethod,
     };
-    dispatch(submitBill(addBillData));
-    // console.log(addBillData);
-  };
 
+    try {
+      await dispatch(submitBill(addBillData)).unwrap();
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Bill added successfully!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      dispatch(clearCart());
+      setCustomerPhone("");
+      setDiscount(0);
+      closeModal.current?.click();
+    } catch (e) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to add bill. Please try again.",
+      });
+    }
+  };
   useEffect(() => {
     dispatch(getAllItems());
     dispatch(getCategories());
@@ -161,7 +194,7 @@ function AddBills() {
 
             <div className="p-2">
               <input
-                type="text"
+                type="number"
                 className="form-control"
                 placeholder="Customer Phone no"
                 value={customerPhone}
@@ -253,13 +286,19 @@ function AddBills() {
                 <div className="modal fade" id="billModal" tabIndex="-1">
                   <div className="modal-dialog modal-md">
                     <div className="modal-content">
-                      <div className="modal-header">
-                        <h5 className="modal-title">Bill</h5>
+                      <div className="modal-header gap-3 ">
+                        <h4 className="modal-title">Bill</h4>
+                        <p className="modal-title ">
+                          <span>Cust_no : </span>
+                          <span>{customerPhone}</span>
+                        </p>
+
                         <button
                           type="button"
                           className="btn-close"
                           data-bs-dismiss="modal"
                           aria-label="Close"
+                          ref={closeModal}
                         ></button>
                       </div>
                       <div className="modal-body">
@@ -310,6 +349,70 @@ function AddBills() {
                             ₹ {grandTotal.toFixed(2)}
                           </div>
                         </div>
+                        <fieldset className="d-flex align-items-center mb-3">
+                          <legend className="col-form-label me-3 mb-0">
+                            Payment Method
+                          </legend>
+                          <div className="d-flex gap-4">
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="paymentMethod"
+                                id="gridRadios1"
+                                value="Cash"
+                                checked={paymentMethod === "Cash"}
+                                onChange={(e) =>
+                                  setPaymentMethod(e.target.value)
+                                }
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="gridRadios1"
+                              >
+                                Cash
+                              </label>
+                            </div>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="paymentMethod"
+                                id="gridRadios2"
+                                value="UPI"
+                                checked={paymentMethod === "UPI"}
+                                onChange={(e) =>
+                                  setPaymentMethod(e.target.value)
+                                }
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="gridRadios2"
+                              >
+                                UPI
+                              </label>
+                            </div>
+                            <div className="form-check disabled">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="paymentMethod"
+                                id="gridRadios3"
+                                value="Online"
+                                checked={paymentMethod === "Online"}
+                                onChange={(e) =>
+                                  setPaymentMethod(e.target.value)
+                                }
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="gridRadios3"
+                              >
+                                Online
+                              </label>
+                            </div>
+                          </div>
+                        </fieldset>
                       </div>
                       <div className="modal-footer justify-content-center">
                         <button

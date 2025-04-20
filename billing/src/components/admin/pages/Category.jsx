@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { IoMdAddCircle } from "react-icons/io";
 import DataTable from "react-data-table-component";
-import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
+
 import {
   addCategory,
   clearMessages,
@@ -99,18 +100,27 @@ function Category() {
     setFormData({ itemName: row.name, img: null });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
-
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      dispatch(deleteCategory(id))
-        .then(() => {
-          dispatch(getCategories());
-          toast.success("Category deleted successfully!");
-        })
-        .catch(() => {
-          toast.error("Error deleting category!");
-        });
-    }
+    Swal.fire({
+      title: "Are you sure you want to delete this category?",
+      text: "You won’t be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteCategory(id))
+          .then(() => {
+            dispatch(getCategories());
+            Swal.fire("Deleted!", "Category has been deleted.", "success");
+          })
+          .catch(() => {
+            Swal.fire("Error!", "Something went wrong.", "error");
+          });
+      }
+    });
   };
 
   const resetForm = () => {
@@ -124,11 +134,15 @@ function Category() {
     e.preventDefault();
 
     if (!formData.itemName.trim()) {
-      toast.error("Please enter a valid category name.");
+      Swal.fire(
+        "Validation Error",
+        "Please enter a valid category name.",
+        "error"
+      );
       return;
     }
     if (!formData.img && !isEditMode) {
-      toast.error("Please upload an image.");
+      Swal.fire("Validation Error", "Please upload an image.", "error");
       return;
     }
 
@@ -143,20 +157,20 @@ function Category() {
         .then(() => {
           resetForm();
           dispatch(getCategories());
-          toast.success("Category updated successfully!");
+          Swal.fire("Updated!", "Category updated successfully.", "success");
         })
         .catch(() => {
-          toast.error("Error updating category!");
+          Swal.fire("Error!", "Error updating category!", "error");
         });
     } else {
       dispatch(addCategory(data))
         .then(() => {
           resetForm();
           dispatch(getCategories());
-          toast.success("Category added successfully!");
+          Swal.fire("Success!", "Category added successfully.", "success");
         })
         .catch(() => {
-          toast.error("Error adding category!");
+          Swal.fire("Error!", "Error adding category!", "error");
         });
     }
   };

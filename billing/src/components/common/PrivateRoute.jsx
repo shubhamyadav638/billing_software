@@ -1,16 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
+  const [unauthorized, setUnauthorized] = useState(false);
 
-  if (!token) {
-    toast.error("First login then access.!");
+  useEffect(() => {
+    if (!token) {
+      Swal.fire({
+        icon: "error",
+        title: "Access Denied",
+        text: "First login then access.!",
+        timer: 2000,
+        showConfirmButton: false,
+      }).then(() => {
+        setUnauthorized(true);
+      });
+    }
+  }, [token]);
+
+  if (!token && unauthorized) {
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return token ? children : null;
 };
 
 export default PrivateRoute;

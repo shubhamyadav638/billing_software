@@ -2,17 +2,7 @@ import mongoose from "mongoose";
 
 const billSchema = new mongoose.Schema(
   {
-    customerName: {
-      type: String,
-    },
-    tableNumber: {
-      type: String,
-    },
-
     subTotal: {
-      type: Number,
-    },
-    taxAmount: {
       type: Number,
     },
     discount: {
@@ -20,12 +10,6 @@ const billSchema = new mongoose.Schema(
     },
     grandTotal: {
       type: Number,
-    },
-    paymentMethod: {
-      type: String,
-    },
-    status: {
-      type: String,
     },
     createdAt: {
       type: String,
@@ -35,6 +19,15 @@ const billSchema = new mongoose.Schema(
     },
     customerPhone: {
       type: Number,
+    },
+    billStatus: {
+      type: String,
+      default: "Active",
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["Cash", "UPI", "Online"],
+      required: true,
     },
   },
   { timestamps: true }

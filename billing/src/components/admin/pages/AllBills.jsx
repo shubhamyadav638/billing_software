@@ -2,9 +2,27 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
-import { getBills } from "../../redux/slice/addBill.slice";
+import { cancelBillStatus, getBills } from "../../redux/slice/addBill.slice.js";
+import Swal from "sweetalert2";
 
 function AllBills() {
+  const handleCancelBill = (billId) => {
+    // console.log(billId)
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You want to cancel this bill?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, cancel it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(cancelBillStatus(billId));
+        Swal.fire("Cancelled!", "The bill has been cancelled.", "success");
+      }
+    });
+  };
   const columns = [
     {
       name: "No",
@@ -38,8 +56,13 @@ function AllBills() {
       sortable: true,
     },
     {
+      name: "Payment_Status",
+      selector: (row) => `₹ ${row.paymentMethod}`,
+      sortable: true,
+    },
+    {
       name: "Bill_Status",
-      selector: (row) => `₹ ${row.billstatus}`,
+      selector: (row) => `${row.billStatus}`,
       sortable: true,
     },
     {
@@ -57,7 +80,12 @@ function AllBills() {
           >
             Print
           </button>
-          <button className="btn btn-sm btn-danger">Cancel</button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={() => handleCancelBill(row._id)}
+          >
+            Cancel
+          </button>
         </>
       ),
     },
