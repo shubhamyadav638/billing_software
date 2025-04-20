@@ -219,10 +219,13 @@ function Header({ menuToggle, setMenuToggle }) {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <p className="dropdown-item d-flex align-items-center">
+                <Link
+                  to="/profile"
+                  className="dropdown-item d-flex align-items-center"
+                >
                   <i className="bi bi-person" />
-                  <Link to="/profile">My Profile</Link>
-                </p>
+                  <span>My Profile</span>
+                </Link>
               </li>
               <li>
                 <hr className="dropdown-divider" />
