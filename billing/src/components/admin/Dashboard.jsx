@@ -1,8 +1,20 @@
 // import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import "react-date-range/dist/styles.css"; // main css file
+import "react-date-range/dist/theme/default.css"; // theme css file
 // import { toast } from "react-hot-toast";
+import { DateRangePicker } from "react-date-range";
+import { addDays } from "date-fns";
+import { useState } from "react";
 
 function Dashboard() {
+  const [state, setState] = useState([
+    {
+      startDate: new Date(),
+      endDate: addDays(new Date(), 7),
+      key: "selection",
+    },
+  ]);
   // const navigate = useNavigate();
 
   // useEffect(() => {
@@ -22,6 +34,14 @@ function Dashboard() {
               <Link to="/dashboard">Home</Link>
             </li>
             <li className="breadcrumb-item active">Dashboard</li>
+            <DateRangePicker
+              onChange={(item) => setState([item.selection])}
+              showSelectionPreview={true}
+              moveRangeOnFirstSelection={false}
+              months={2}
+              ranges={state}
+              direction="horizontal"
+            />
           </ol>
         </nav>
       </div>
@@ -31,6 +51,37 @@ function Dashboard() {
             <div className="row">
               <div className="col-xxl-4 col-md-6">
                 <div className="card info-card sales-card">
+                  <div className="filter">
+                    <a
+                      className="icon"
+                      href="#"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i className="bi bi-three-dots"></i>
+                    </a>
+                    <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                      <li className="dropdown-header text-start">
+                        <h6>Filter</h6>
+                      </li>
+
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          Today
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Month
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Year
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                   <div className="card-body">
                     <h5 className="card-title">
                       Sales <span>| Today</span>
@@ -54,6 +105,37 @@ function Dashboard() {
               </div>
               <div className="col-xxl-4 col-md-6">
                 <div className="card info-card sales-card">
+                  <div className="filter">
+                    <a
+                      className="icon"
+                      href="#"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i className="bi bi-three-dots"></i>
+                    </a>
+                    <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                      <li className="dropdown-header text-start">
+                        <h6>Filter</h6>
+                      </li>
+
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          Today
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Month
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Year
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                   <div className="card-body">
                     <h5 className="card-title">
                       Sales <span>| Today</span>
@@ -78,6 +160,37 @@ function Dashboard() {
 
               <div className="col-xxl-4 col-md-6">
                 <div className="card info-card revenue-card">
+                  <div className="filter">
+                    <a
+                      className="icon"
+                      href="#"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i className="bi bi-three-dots"></i>
+                    </a>
+                    <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                      <li className="dropdown-header text-start">
+                        <h6>Filter</h6>
+                      </li>
+
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          Today
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Month
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          This Year
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                   <div className="card-body">
                     <h5 className="card-title">
                       Revenue <span>| This Month</span>

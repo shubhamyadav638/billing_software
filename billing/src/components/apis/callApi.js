@@ -1,6 +1,8 @@
 import axios from "axios";
 const userLogin = "http://localhost:8000/api/v1/user/login";
 const userUpdate = "http://localhost:8000/api/v1/user/update";
+const userImgremove = "http://localhost:8000/api/v1/user/removeimg";
+const changePass = "http://localhost:8000/api/v1/user/changepass";
 const addcategory = "http://localhost:8000/api/v1/categoryitem/addcategory";
 const getcategory = "http://localhost:8000/api/v1/categoryitem/getcategories";
 const deleteCategory = "http://localhost:8000/api/v1/categoryitem/category";
@@ -114,9 +116,44 @@ export const login = async (credentials) => {
     throw error.response?.data;
   }
 };
-//!------------- user  update profile ----------
-export const updateUserProfileAPI = async (id, profileData) => {
-  const response = await axios.put(`${userUpdate}/${id}`, profileData);
+
+//!=================== remove user profile img ========
+
+export const removeUserImgAPI = async (id) => {
+  const response = await axios.delete(`${userImgremove}/${id}`);
+  return response.data;
+};
+// //!------------- user  update profile ----------
+
+export const updateUserProfileAPI = async (id, formData) => {
+  const res = await axios.put(`${userUpdate}/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};
+
+//!------------- user  change password ----------
+export const changePassAPI = async ({
+  id,
+  currentPassword,
+  newPassword,
+  confirmNewPassword,
+}) => {
+  const response = await axios.patch(
+    `${changePass}/${id}`,
+    {
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
   return response.data;
 };
 

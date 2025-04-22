@@ -1,18 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { updateProfile } from "../../redux/slice/user.slice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  changePassword,
+  removeUserImg,
+  updateProfile,
+} from "../../redux/slice/user.slice";
 import Swal from "sweetalert2";
 
 function Profile() {
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    renewPassword: "",
+  });
+
+  const { loading } = useSelector((state) => state.user);
+  // console.log(error);
+
   const dispatch = useDispatch();
+  const [profileImage, setProfileImage] = useState(null);
+
   const user = JSON.parse(localStorage.getItem("user"));
   // console.log(user);
+  // console.log(user._id);
   const [profileData, setProfileData] = useState({
     fullName: user?.fullName || "",
     address: user?.address || "",
     mobileNo: user?.mobileNo || "",
     email: user?.email || "",
+    imgUrl: user?.imgUrl || "",
   });
 
   useEffect(() => {
@@ -21,6 +38,7 @@ function Profile() {
       address: user?.address || "",
       mobileNo: user?.mobileNo || "",
       email: user?.email || "",
+      imgUrl: user?.imgUrl || "",
     });
   }, []);
 
@@ -31,17 +49,51 @@ function Profile() {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    const id = user?.id;
+    const id = user?._id;
+
+    if (!id) {
+      Swal.fire({
+        icon: "error",
+        title: "ID Missing",
+        text: "User ID is missing. Please log in again.",
+      });
+      return;
+    }
+
     try {
-      const resultAction = await dispatch(updateProfile({ id, profileData }));
+      const formData = new FormData();
+      formData.append("fullName", profileData.fullName);
+      formData.append("address", profileData.address);
+      formData.append("mobileNo", profileData.mobileNo);
+      formData.append("email", profileData.email);
+
+      if (profileImage) {
+        formData.append("img", profileImage);
+      }
+
+      const resultAction = await dispatch(updateProfile({ id, formData }));
+
       if (updateProfile.fulfilled.match(resultAction)) {
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Profile updated successfully!",
         });
-        const updatedUser = { ...user, ...profileData };
+
+        const updatedUser = {
+          ...user,
+          ...profileData,
+          imgUrl: resultAction.payload?.imgUrl || user.imgUrl,
+        };
+
         localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        setProfileData((prev) => ({
+          ...prev,
+          imgUrl: updatedUser.imgUrl,
+        }));
+
+        setProfileImage(null);
       } else {
         throw new Error(resultAction.error?.message);
       }
@@ -51,6 +103,74 @@ function Profile() {
         title: "Oops...",
         text: `Failed to update profile: ${error.message}`,
       });
+    }
+  };
+
+  const handleRemoveImage = async (e) => {
+    e.preventDefault();
+    const confirmed = await Swal.fire({
+      title: "Are you sure?",
+      text: "Your profile image will be deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmed.isConfirmed) {
+      try {
+        const resultAction = await dispatch(removeUserImg(user._id));
+        if (removeUserImg.fulfilled.match(resultAction)) {
+          Swal.fire(
+            "Deleted!",
+            "Your profile image has been removed.",
+            "success"
+          );
+
+          const updatedUser = { ...user, imgUrl: null };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setProfileData((prev) => ({ ...prev, imgUrl: null }));
+        } else {
+          throw new Error(resultAction.payload || "Failed to remove image.");
+        }
+      } catch (error) {
+        Swal.fire("Error", error.message, "error");
+      }
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    const { currentPassword, newPassword, renewPassword } = passwordData;
+
+    try {
+      const resultAction = await dispatch(
+        changePassword({
+          id: user._id,
+          currentPassword,
+          newPassword,
+          confirmNewPassword: renewPassword,
+        })
+      );
+
+      if (changePassword.fulfilled.match(resultAction)) {
+        Swal.fire("Success", "Password changed successfully!", "success");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          renewPassword: "",
+        });
+      } else {
+        throw new Error(resultAction.payload || "Failed to change password");
+      }
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+      console.log(err);
     }
   };
 
@@ -114,12 +234,21 @@ function Profile() {
                   </label>
                   <div className="col-md-8 col-lg-9">
                     <img
-                      src={"assets/img/profile-img.jpg"}
+                      src={user?.imgUrl}
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "cover",
+                      }}
                       alt="Profile"
                       className="img-thumbnail"
                     />
                     <div className="pt-2">
-                      <input type="file" style={{ display: "none" }} />
+                      <input
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={(e) => setProfileImage(e.target.files[0])}
+                      />
                       <a
                         href="#"
                         className="btn btn-primary btn-sm"
@@ -134,6 +263,7 @@ function Profile() {
                         href="#"
                         className="btn btn-danger btn-sm"
                         title="Remove my profile image"
+                        onClick={handleRemoveImage}
                       >
                         <i className="bi bi-trash"></i> Remove
                       </a>
@@ -218,7 +348,7 @@ function Profile() {
               id="profile-change-password"
               role="tabpanel"
             >
-              <form>
+              <form onSubmit={handleChangePassword}>
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Current Password
@@ -229,6 +359,8 @@ function Profile() {
                       type="password"
                       className="form-control"
                       id="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
                     />
                   </div>
                 </div>
@@ -243,6 +375,8 @@ function Profile() {
                       type="password"
                       className="form-control"
                       id="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
                     />
                   </div>
                 </div>
@@ -257,13 +391,19 @@ function Profile() {
                       type="password"
                       className="form-control"
                       id="renewPassword"
+                      value={passwordData.renewPassword}
+                      onChange={handlePasswordChange}
                     />
                   </div>
                 </div>
 
                 <div className="text-center">
-                  <button type="submit" className="btn btn-primary">
-                    Change Password
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={loading}
+                  >
+                    {loading ? "Changing..." : "Change Password"}
                   </button>
                 </div>
               </form>

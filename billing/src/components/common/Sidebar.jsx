@@ -91,10 +91,13 @@ function Sidebar() {
         </li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed text-decoration-none">
+          <Link
+            to="/setting"
+            className="nav-link collapsed text-decoration-none"
+          >
             <i className="bi bi-gear" />
             <span>Account Settings</span>
-          </a>
+          </Link>
         </li>
 
         <li className="nav-item">

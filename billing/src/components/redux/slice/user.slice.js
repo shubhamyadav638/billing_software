@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { login, updateUserProfileAPI } from "../../apis/callApi";
+import {
+  changePassAPI,
+  login,
+  removeUserImgAPI,
+  updateUserProfileAPI,
+} from "../../apis/callApi";
 
 //!------------- user login thunk ---------------
 
@@ -17,19 +22,46 @@ export const userLogin = createAsyncThunk(
 //!------------- update User Profile  thunk ---------------
 
 export const updateProfile = createAsyncThunk(
-  "user/updateProfile",
-  async ({ id, profileData }, { rejectWithValue }) => {
+  "updateProfile",
+  async ({ id, formData }, { rejectWithValue }) => {
     try {
-      return await updateUserProfileAPI(id, profileData);
+      return await updateUserProfileAPI(id, formData);
     } catch (error) {
       return rejectWithValue(error.message || "Profile update failed");
     }
   }
 );
+
+//!------------- change User pass  thunk ---------------
+export const changePassword = createAsyncThunk(
+  "changePassword",
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      return await changePassAPI(passwordData);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to change password"
+      );
+    }
+  }
+);
+
+//!------------- remove user image thunk ---------------
+export const removeUserImg = createAsyncThunk(
+  "removeUserImg",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await removeUserImgAPI(id);
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to remove image");
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: [],
+    user: {},
     loading: false,
     success: false,
     error: null,
@@ -75,9 +107,50 @@ const userSlice = createSlice({
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
+        const localUser = JSON.parse(localStorage.getItem("user")) || {};
+        const updatedUser = {
+          ...localUser,
+          address: action.payload.user?.address || localUser.address,
+          imgUrl: action.payload.user?.imgUrl || localUser.imgUrl,
+        };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       })
+
       .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //!========== change pass =======
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.user = action.payload.user;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //!========== remove user image =======
+      .addCase(removeUserImg.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeUserImg.fulfilled, (state) => {
+        state.loading = false;
+        const updatedUser = {
+          ...state.user,
+          imgUrl: null,
+        };
+        state.user = updatedUser;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      })
+      .addCase(removeUserImg.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

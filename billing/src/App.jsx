@@ -13,6 +13,7 @@ import AddBills from "./components/admin/pages/Addbills";
 import AllBills from "./components/admin/pages/AllBills";
 import PrivateRoute from "./components/common/PrivateRoute";
 import Profile from "./components/admin/pages/Profile";
+import Setting from "./components/admin/pages/Setting";
 
 function Layout({ children, menuToggle, setMenuToggle }) {
   const location = useLocation();
@@ -48,6 +49,7 @@ function App() {
           <Route path="/all-bills" element={<AllBills />} />
           <Route path="/add-bills" element={<AddBills />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/setting" element={<Setting />} />
         </Routes>
       </Layout>
     </BrowserRouter>

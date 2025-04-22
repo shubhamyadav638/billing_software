@@ -23,6 +23,7 @@ function AddBills() {
   const [customerPhone, setCustomerPhone] = useState("");
   const closeModal = useRef();
   const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [activeCategory, setActiveCategory] = useState("All");
 
   const handleSubmitBill = async () => {
     if (cart.length === 0) {
@@ -90,6 +91,7 @@ function AddBills() {
   };
 
   const getCategoryData = (category_id) => {
+    setActiveCategory(category_id);
     const categoryItems = items.filter((item) => item.category === category_id);
     setFinalItems(categoryItems);
   };
@@ -122,8 +124,13 @@ function AddBills() {
               <ul className="nav nav-pills nav-fill mb-3">
                 <li className="nav-item">
                   <button
-                    className="nav-link active"
-                    onClick={() => setFinalItems(items)}
+                    className={`nav-link ${
+                      activeCategory === "All" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFinalItems(items);
+                      setActiveCategory("All");
+                    }}
                   >
                     All
                   </button>
@@ -131,7 +138,9 @@ function AddBills() {
                 {categories.map((category) => (
                   <li className="nav-item" key={category._id}>
                     <button
-                      className="nav-link"
+                      className={`nav-link ${
+                        activeCategory === category._id ? "active" : ""
+                      }`}
                       onClick={() => getCategoryData(category._id)}
                     >
                       {category.itemName}
@@ -264,7 +273,7 @@ function AddBills() {
                   </div>
                 </div>
                 <div className="row mb-3">
-                  <div className="col-6">Total Tax</div>
+                  <div className="col-6">GST</div>
                   <div className="col-6 text-end">₹ {totalTax.toFixed(2)}</div>
                 </div>
                 <div className="row mb-3">
@@ -340,7 +349,7 @@ function AddBills() {
                           <div className="col-6 text-end">
                             ₹ {disCount.toFixed(2)}
                           </div>
-                          <div className="col-6">Total Tax</div>
+                          <div className="col-6">GST</div>
                           <div className="col-6 text-end">
                             ₹ {totalTax.toFixed(2)}
                           </div>

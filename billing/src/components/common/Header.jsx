@@ -202,8 +202,12 @@ function Header({ menuToggle, setMenuToggle }) {
               data-bs-toggle="dropdown"
             >
               <img
-                src="assets/img/profile-img.jpg"
-                alt="Profile"
+                src={userData.imgUrl}
+                style={{
+                  width: "40px",
+                  // height: "40px",
+                  objectFit: "cover",
+                }}
                 className="rounded-circle"
               />
               <span className="d-none d-md-block dropdown-toggle ps-2">
@@ -231,13 +235,13 @@ function Header({ menuToggle, setMenuToggle }) {
                 <hr className="dropdown-divider" />
               </li>
               <li>
-                <a
+                <Link
+                  to="/setting"
                   className="dropdown-item d-flex align-items-center"
-                  href="users-profile.html"
                 >
                   <i className="bi bi-gear" />
                   <span>Account Settings</span>
-                </a>
+                </Link>
               </li>
               <li>
                 <hr className="dropdown-divider" />

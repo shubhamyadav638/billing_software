@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 // import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -190,13 +192,15 @@ export const userLogin = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        mobileNo: user.mobileNo,
-        isActive: user.isActive,
-      },
+      user,
+      // user: {
+
+      //   // id: user._id,
+      //   // fullName: user.fullName,
+      //   // email: user.email,
+      //   // mobileNo: user.mobileNo,
+      //   // isActive: user.isActive,
+      // },
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -213,6 +217,7 @@ export const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const { fullName, mobileNo, address, email } = req.body;
+    const imgFile = req.file;
 
     const updatedData = {};
 
@@ -228,6 +233,13 @@ export const updateUser = async (req, res) => {
         });
       }
       updatedData.mobileNo = mobileNo;
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     if (email) {
@@ -248,12 +260,12 @@ export const updateUser = async (req, res) => {
       }
 
       updatedData.email = email;
-
-      // updatedData.isEmailVerify = false;
-      // updatedData.isActive = 0;
-
+      // Optional: Uncomment the following if you want email re-verification
       /*
-      const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
       const verifyUrl = `http://localhost:3000/api/v1/user/verify-email/${token}`;
       await transporter.sendMail({
         to: email,
@@ -263,18 +275,27 @@ export const updateUser = async (req, res) => {
       */
     }
 
+    if (imgFile) {
+      if (user.imgUrl) {
+        const oldImagePath = path.join(
+          "public/userimg",
+          path.basename(user.imgUrl)
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      updatedData.imgUrl = `${req.protocol}://${req.get("host")}/userimg/${
+        imgFile.filename
+      }`;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updatedData },
       { new: true }
     );
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
 
     return res.status(200).json({
       success: true,
@@ -286,10 +307,126 @@ export const updateUser = async (req, res) => {
         mobileNo: updatedUser.mobileNo,
         address: updatedUser.address,
         isEmailVerify: updatedUser.isEmailVerify,
+        imgUrl: updatedUser.imgUrl,
       },
     });
   } catch (error) {
     console.error("Error updating user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+//!=================== Remove Image ==============
+
+export const removeUserImage = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.imgUrl) {
+      const imagePath = path.join("public/userimg", path.basename(user.imgUrl));
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+
+      user.imgUrl = null;
+      await user.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile image removed successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        mobileNo: user.mobileNo,
+        address: user.address,
+        isEmailVerify: user.isEmailVerify,
+        imgUrl: user.imgUrl,
+      },
+    });
+  } catch (error) {
+    console.error("Error removing profile image:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while removing the image",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+//!================ Change user password ===========
+export const changeUserPassword = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password and confirmation do not match",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from the current password",
+      });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong. Please try again later.",
