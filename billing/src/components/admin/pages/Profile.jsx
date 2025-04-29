@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   changePassword,
@@ -9,54 +9,48 @@ import {
 import Swal from "sweetalert2";
 
 function Profile() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, loading } = useSelector((state) => state.user);
+  // console.log(user);
+
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileData, setProfileData] = useState({
+    fullName: "",
+    address: "",
+    mobileNo: "",
+    email: "",
+    imgUrl: "",
+  });
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     renewPassword: "",
   });
 
-  const { loading } = useSelector((state) => state.user);
-  // console.log(error);
-
-  const dispatch = useDispatch();
-  const [profileImage, setProfileImage] = useState(null);
-
-  const user = JSON.parse(localStorage.getItem("user"));
-  // console.log(user);
-  // console.log(user._id);
-  const [profileData, setProfileData] = useState({
-    fullName: user?.fullName || "",
-    address: user?.address || "",
-    mobileNo: user?.mobileNo || "",
-    email: user?.email || "",
-    imgUrl: user?.imgUrl || "",
-  });
-
   useEffect(() => {
-    setProfileData({
-      fullName: user?.fullName || "",
-      address: user?.address || "",
-      mobileNo: user?.mobileNo || "",
-      email: user?.email || "",
-      imgUrl: user?.imgUrl || "",
-    });
-  }, []);
+    if (user) {
+      setProfileData({
+        fullName: user.fullName || "",
+        address: user.address || "",
+        mobileNo: user.mobileNo || "",
+        email: user.email || "",
+        imgUrl: user.imgUrl || "",
+      });
+    }
+  }, [user]);
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setProfileData((prevState) => ({ ...prevState, [name]: value }));
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    const id = user?._id;
 
-    if (!id) {
-      Swal.fire({
-        icon: "error",
-        title: "ID Missing",
-        text: "User ID is missing. Please log in again.",
-      });
+    if (!user?._id) {
+      Swal.fire("Error", "User ID missing", "error");
       return;
     }
 
@@ -71,46 +65,24 @@ function Profile() {
         formData.append("img", profileImage);
       }
 
-      const resultAction = await dispatch(updateProfile({ id, formData }));
+      const resultAction = await dispatch(
+        updateProfile({ id: user._id, formData })
+      );
 
       if (updateProfile.fulfilled.match(resultAction)) {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Profile updated successfully!",
-        });
-
-        const updatedUser = {
-          ...user,
-          ...profileData,
-          imgUrl: resultAction.payload?.imgUrl || user.imgUrl,
-        };
-
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-
-        setProfileData((prev) => ({
-          ...prev,
-          imgUrl: updatedUser.imgUrl,
-        }));
-
-        setProfileImage(null);
+        Swal.fire("Success", "Profile updated successfully!", "success");
       } else {
-        throw new Error(resultAction.error?.message);
+        throw new Error(resultAction.payload || "Failed to update profile");
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: `Failed to update profile: ${error.message}`,
-      });
+      Swal.fire("Error", error.message, "error");
     }
   };
 
-  const handleRemoveImage = async (e) => {
-    e.preventDefault();
+  const handleRemoveImage = async () => {
     const confirmed = await Swal.fire({
       title: "Are you sure?",
-      text: "Your profile image will be deleted.",
+      text: "This will delete your profile image.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, delete it!",
@@ -125,17 +97,35 @@ function Profile() {
             "Your profile image has been removed.",
             "success"
           );
+          setProfileData((prev) => ({
+            ...prev,
+            imgUrl: "",
+          }));
 
-          const updatedUser = { ...user, imgUrl: null };
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-          setProfileData((prev) => ({ ...prev, imgUrl: null }));
+          if (profileImage) {
+            URL.revokeObjectURL(profileImage.preview);
+          }
+          setProfileImage(null);
         } else {
-          throw new Error(resultAction.payload || "Failed to remove image.");
+          throw new Error(resultAction.payload || "Failed to remove image");
         }
       } catch (error) {
         Swal.fire("Error", error.message, "error");
       }
     }
+  };
+
+  const handleProfileImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (profileImage) {
+        URL.revokeObjectURL(profileImage.preview);
+      }
+      file.preview = URL.createObjectURL(file);
+      setProfileImage(file);
+    }
+
+    // e.target.value = null;
   };
 
   const handlePasswordChange = (e) => {
@@ -145,16 +135,13 @@ function Profile() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
-    const { currentPassword, newPassword, renewPassword } = passwordData;
-
     try {
       const resultAction = await dispatch(
         changePassword({
           id: user._id,
-          currentPassword,
-          newPassword,
-          confirmNewPassword: renewPassword,
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          confirmNewPassword: passwordData.renewPassword,
         })
       );
 
@@ -165,12 +152,12 @@ function Profile() {
           newPassword: "",
           renewPassword: "",
         });
+        navigate("/profile");
       } else {
         throw new Error(resultAction.payload || "Failed to change password");
       }
-    } catch (err) {
-      Swal.fire("Error", err.message, "error");
-      console.log(err);
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
     }
   };
 
@@ -181,13 +168,9 @@ function Profile() {
         <nav>
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/dashboard" className="text-decoration-none">
-                Home
-              </Link>
+              <Link to="/dashboard">Home</Link>
             </li>
-            <li className="breadcrumb-item">
-              <Link className="text-decoration-none">Profile</Link>
-            </li>
+            <li className="breadcrumb-item active">Profile</li>
           </ol>
         </nav>
       </div>
@@ -200,9 +183,7 @@ function Profile() {
                 className="nav-link active"
                 data-bs-toggle="tab"
                 data-bs-target="#profile-edit"
-                aria-selected="false"
                 role="tab"
-                tabIndex="-1"
               >
                 Edit Profile
               </button>
@@ -212,9 +193,7 @@ function Profile() {
                 className="nav-link"
                 data-bs-toggle="tab"
                 data-bs-target="#profile-change-password"
-                aria-selected="false"
                 role="tab"
-                tabIndex="-1"
               >
                 Change Password
               </button>
@@ -223,7 +202,7 @@ function Profile() {
 
           <div className="tab-content pt-2">
             <div
-              className="tab-pane fade profile-edit pt-3 show active"
+              className="tab-pane fade show active pt-3"
               id="profile-edit"
               role="tabpanel"
             >
@@ -234,7 +213,11 @@ function Profile() {
                   </label>
                   <div className="col-md-8 col-lg-9">
                     <img
-                      src={user?.imgUrl}
+                      src={
+                        profileImage
+                          ? profileImage.preview
+                          : profileData.imgUrl || "assets/img/profile-img.jpg"
+                      }
                       style={{
                         width: "100px",
                         height: "100px",
@@ -247,22 +230,19 @@ function Profile() {
                       <input
                         type="file"
                         style={{ display: "none" }}
-                        onChange={(e) => setProfileImage(e.target.files[0])}
+                        id="profileImageInput"
+                        onChange={handleProfileImage}
                       />
                       <a
-                        href="#"
                         className="btn btn-primary btn-sm"
                         onClick={() =>
-                          document.querySelector('input[type="file"]').click()
+                          document.getElementById("profileImageInput").click()
                         }
-                        title="Upload new profile image"
                       >
                         <i className="bi bi-upload"></i> Upload
                       </a>
                       <a
-                        href="#"
                         className="btn btn-danger btn-sm"
-                        title="Remove my profile image"
                         onClick={handleRemoveImage}
                       >
                         <i className="bi bi-trash"></i> Remove
@@ -271,6 +251,7 @@ function Profile() {
                   </div>
                 </div>
 
+                {/* Other fields */}
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Full Name
@@ -280,13 +261,11 @@ function Profile() {
                       name="fullName"
                       type="text"
                       className="form-control"
-                      id="fullName"
                       value={profileData.fullName}
                       onChange={handleProfileChange}
                     />
                   </div>
                 </div>
-
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Address
@@ -296,13 +275,11 @@ function Profile() {
                       name="address"
                       type="text"
                       className="form-control"
-                      id="Address"
                       value={profileData.address}
                       onChange={handleProfileChange}
                     />
                   </div>
                 </div>
-
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Phone
@@ -312,13 +289,11 @@ function Profile() {
                       name="mobileNo"
                       type="text"
                       className="form-control"
-                      id="mobileNo"
                       value={profileData.mobileNo}
                       onChange={handleProfileChange}
                     />
                   </div>
                 </div>
-
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Email
@@ -328,7 +303,6 @@ function Profile() {
                       name="email"
                       type="email"
                       className="form-control"
-                      id="Email"
                       value={profileData.email}
                       onChange={handleProfileChange}
                     />
@@ -337,7 +311,7 @@ function Profile() {
 
                 <div className="text-center">
                   <button type="submit" className="btn btn-primary">
-                    Save Changes
+                    {loading ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
@@ -358,13 +332,11 @@ function Profile() {
                       name="currentPassword"
                       type="password"
                       className="form-control"
-                      id="currentPassword"
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
                     />
                   </div>
                 </div>
-
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     New Password
@@ -374,13 +346,11 @@ function Profile() {
                       name="newPassword"
                       type="password"
                       className="form-control"
-                      id="newPassword"
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
                     />
                   </div>
                 </div>
-
                 <div className="row mb-3">
                   <label className="col-md-4 col-lg-3 col-form-label">
                     Re-enter New Password
@@ -390,7 +360,6 @@ function Profile() {
                       name="renewPassword"
                       type="password"
                       className="form-control"
-                      id="renewPassword"
                       value={passwordData.renewPassword}
                       onChange={handlePasswordChange}
                     />
@@ -398,11 +367,7 @@ function Profile() {
                 </div>
 
                 <div className="text-center">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}
-                  >
+                  <button type="submit" className="btn btn-primary">
                     {loading ? "Changing..." : "Change Password"}
                   </button>
                 </div>

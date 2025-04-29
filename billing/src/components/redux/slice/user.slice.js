@@ -61,7 +61,7 @@ export const removeUserImg = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: {},
+    user: JSON.parse(localStorage.getItem("user")) || {},
     loading: false,
     success: false,
     error: null,
@@ -106,14 +106,18 @@ const userSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        const localUser = JSON.parse(localStorage.getItem("user")) || {};
-        const updatedUser = {
-          ...localUser,
-          address: action.payload.user?.address || localUser.address,
-          imgUrl: action.payload.user?.imgUrl || localUser.imgUrl,
-        };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        const updatedUser = action.payload.user;
+
+        if (updatedUser) {
+          state.user = {
+            ...state.user,
+            ...updatedUser,
+          };
+
+          // Update localStorage also
+          localStorage.setItem("user", JSON.stringify(state.user));
+        }
       })
 
       .addCase(updateProfile.rejected, (state, action) => {
@@ -129,7 +133,7 @@ const userSlice = createSlice({
       .addCase(changePassword.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.user = action.payload.user;
+        // state.user = action.payload.user;
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { clearToken } from "../redux/slice/user.slice";
 import Swal from "sweetalert2";
 
@@ -8,7 +8,7 @@ function Header({ menuToggle, setMenuToggle }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const userData = JSON.parse(localStorage.getItem("user"));
+  const userData = useSelector((state) => state.user.user);
 
   const handleLogout = () => {
     dispatch(clearToken());
@@ -202,7 +202,7 @@ function Header({ menuToggle, setMenuToggle }) {
               data-bs-toggle="dropdown"
             >
               <img
-                src={userData.imgUrl}
+                src={userData?.imgUrl || "assets/img/profile-img.jpg"}
                 style={{
                   width: "40px",
                   // height: "40px",
