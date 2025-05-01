@@ -38,12 +38,16 @@ const columnsConfig = (handleEdit, handleDelete) => [
   },
   {
     name: "Price",
-    selector: (row) =>
-      typeof row.price === "object" && row.price.$numberDecimal
-        ? row.price.$numberDecimal
-        : row.price,
+    selector: (row) => {
+      const price =
+        typeof row.price === "object" && row.price.$numberDecimal
+          ? row.price.$numberDecimal
+          : row.price;
+      return `₹ ${price}`;
+    },
     sortable: true,
   },
+
   {
     name: "Unit",
     selector: (row) => row.unit,

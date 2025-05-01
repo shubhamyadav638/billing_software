@@ -202,7 +202,7 @@ function Header({ menuToggle, setMenuToggle }) {
               data-bs-toggle="dropdown"
             >
               <img
-                src={userData?.imgUrl || "assets/img/profile-img.jpg"}
+                src={userData?.imgUrl || "assets/img/demo-profile.jpg"}
                 style={{
                   width: "40px",
                   // height: "40px",

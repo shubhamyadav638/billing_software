@@ -53,7 +53,25 @@ function Profile() {
       Swal.fire("Error", "User ID missing", "error");
       return;
     }
+    const phoneRegex = /^[0-9]{10,}$/;
+    if (!phoneRegex.test(profileData.mobileNo)) {
+      Swal.fire(
+        "Invalid Input",
+        "Phone number must be at least 10 digits and numeric.",
+        "warning"
+      );
+      return;
+    }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(profileData.email)) {
+      Swal.fire(
+        "Invalid Input",
+        "Please enter a valid email address.",
+        "warning"
+      );
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("fullName", profileData.fullName);
@@ -124,8 +142,6 @@ function Profile() {
       file.preview = URL.createObjectURL(file);
       setProfileImage(file);
     }
-
-    // e.target.value = null;
   };
 
   const handlePasswordChange = (e) => {
@@ -216,7 +232,7 @@ function Profile() {
                       src={
                         profileImage
                           ? profileImage.preview
-                          : profileData.imgUrl || "assets/img/profile-img.jpg"
+                          : profileData.imgUrl || "assets/img/demo-profile.jpg"
                       }
                       style={{
                         width: "100px",
@@ -224,7 +240,7 @@ function Profile() {
                         objectFit: "cover",
                       }}
                       alt="Profile"
-                      className="img-thumbnail"
+                      className="img-fluid rounded"
                     />
                     <div className="pt-2">
                       <input

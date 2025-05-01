@@ -28,6 +28,7 @@ function AllBills() {
       name: "No",
       selector: (row, index) => index + 1,
       sortable: true,
+      width: "70px",
     },
     {
       name: "Cust_Phone",
@@ -70,7 +71,7 @@ function AllBills() {
       cell: (row) => (
         <>
           <button
-            className="btn btn-sm btn-primary me-2"
+            className="btn btn-sm btn-primary me-2 fs-6"
             type="button"
             data-bs-toggle="modal"
             data-bs-target="#billModal"
@@ -81,7 +82,7 @@ function AllBills() {
             Print
           </button>
           <button
-            className="btn btn-sm btn-danger"
+            className="btn btn-sm btn-danger fs-6"
             onClick={() => handleCancelBill(row._id)}
           >
             Cancel
