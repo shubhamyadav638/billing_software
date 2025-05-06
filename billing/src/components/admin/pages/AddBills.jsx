@@ -10,6 +10,7 @@ import {
 import { getCategories } from "../../redux/slice/item.slice";
 import { submitBill } from "../../redux/slice/addBill.slice";
 import Swal from "sweetalert2";
+import { CiCirclePlus } from "react-icons/ci";
 
 function AddBills() {
   const dispatch = useDispatch();
@@ -191,6 +192,7 @@ function AddBills() {
               <div>
                 <i className="bi bi-cart"></i>
                 <span className="badge bg-primary">{cart.length}</span>
+                <CiCirclePlus />
               </div>
               <div>
                 <i
@@ -356,6 +358,16 @@ function AddBills() {
                           <div className="col-6 fw-bold">Grand Total</div>
                           <div className="col-6 text-end fw-bold">
                             ₹ {grandTotal.toFixed(2)}
+                          </div>
+
+                          <div className="col-6">Cash</div>
+                          <div className="col-6 text-end ">
+                            <input
+                              type="number"
+                              style={{ width: "80px" }}
+                              // value={disCount}
+                              // onChange={handleDiscount}
+                            />
                           </div>
                         </div>
                         <fieldset className="d-flex align-items-center mb-3">
