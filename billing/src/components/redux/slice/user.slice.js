@@ -84,14 +84,29 @@ const userSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      // .addCase(userLogin.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.user = action.payload;
+      //   const token = action.payload?.token;
+      //   const userData = action.payload?.user;
+      //   if (token) {
+      //     localStorage.setItem("token", token);
+      //     localStorage.setItem("user", JSON.stringify(userData));
+      //   }
+      // })
+
       .addCase(userLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
         const token = action.payload?.token;
         const userData = action.payload?.user;
+
+        if (userData) {
+          state.user = userData;
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+
         if (token) {
           localStorage.setItem("token", token);
-          localStorage.setItem("user", JSON.stringify(userData));
         }
       })
       .addCase(userLogin.rejected, (state, action) => {
@@ -114,8 +129,6 @@ const userSlice = createSlice({
             ...state.user,
             ...updatedUser,
           };
-
-          // Update localStorage also
           localStorage.setItem("user", JSON.stringify(state.user));
         }
       })

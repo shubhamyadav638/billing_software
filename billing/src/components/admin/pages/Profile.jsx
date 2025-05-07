@@ -30,6 +30,7 @@ function Profile() {
   });
 
   useEffect(() => {
+    // console.log("User update ", user);
     if (user) {
       setProfileData({
         fullName: user.fullName || "",
